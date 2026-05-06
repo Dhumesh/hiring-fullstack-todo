@@ -1,121 +1,202 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { useCallback, useEffect, useState } from 'react'
+import {
+  createTodo,
+  deleteTodo,
+  getTodos,
+  loginUser,
+  setAuthToken,
+  signupUser,
+  toggleTodoDone,
+  updateTodo,
+} from './develop/api'
+import AppShell from './develop/components/AppShell'
+import AdminPage from './develop/pages/AdminPage'
+import LoginPage from './develop/pages/LoginPage'
+import SignupPage from './develop/pages/SignupPage'
+import TasksPage from './develop/pages/TasksPage'
 import './App.css'
 
+const savedSession = JSON.parse(localStorage.getItem('taskflowSession') || 'null')
+
 function App() {
-  const [count, setCount] = useState(0)
+  const [activeView, setActiveView] = useState(savedSession ? 'tasks' : 'login')
+  const [authError, setAuthError] = useState('')
+  const [currentUser, setCurrentUser] = useState(savedSession?.user || null)
+  const [loading, setLoading] = useState(false)
+  const [taskError, setTaskError] = useState('')
+  const [todos, setTodos] = useState([])
+  const [token, setToken] = useState(savedSession?.token || '')
+
+  function saveSession(data) {
+    localStorage.setItem(
+      'taskflowSession',
+      JSON.stringify({
+        token: data.token,
+        user: data.user,
+      }),
+    )
+    setToken(data.token)
+    setCurrentUser(data.user)
+    setActiveView('tasks')
+  }
+
+  async function handleLogin(payload) {
+    setLoading(true)
+    setAuthError('')
+
+    try {
+      const data = await loginUser(payload)
+      saveSession(data)
+    } catch (error) {
+      setAuthError(error.response?.data?.message || 'Login failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleSignup(payload) {
+    setLoading(true)
+    setAuthError('')
+
+    try {
+      const data = await signupUser(payload)
+      saveSession(data)
+    } catch (error) {
+      setAuthError(error.response?.data?.message || 'Signup failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem('taskflowSession')
+    setAuthToken('')
+    setToken('')
+    setCurrentUser(null)
+    setTodos([])
+    setActiveView('login')
+  }, [])
+
+  const loadTodos = useCallback(async () => {
+    setLoading(true)
+    setTaskError('')
+
+    try {
+      const data = await getTodos()
+      setTodos(data)
+    } catch (error) {
+      setTaskError(error.response?.data?.message || 'Could not load tasks.')
+      if (error.response?.status === 401) {
+        handleLogout()
+      }
+    } finally {
+      setLoading(false)
+    }
+  }, [handleLogout])
+
+  useEffect(() => {
+    setAuthToken(token)
+  }, [token])
+
+  useEffect(() => {
+    if (!token) {
+      return
+    }
+
+    const timer = window.setTimeout(() => {
+      loadTodos()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
+  }, [loadTodos, token])
+
+  async function handleCreateTodo(payload) {
+    setTaskError('')
+
+    try {
+      const createdTodo = await createTodo(payload)
+      setTodos((current) => [createdTodo, ...current])
+    } catch (error) {
+      setTaskError(error.response?.data?.message || 'Could not create task.')
+    }
+  }
+
+  async function handleUpdateTodo(id, payload) {
+    setTaskError('')
+
+    try {
+      const updatedTodo = await updateTodo(id, payload)
+      setTodos((current) => current.map((todo) => (todo._id === id ? updatedTodo : todo)))
+    } catch (error) {
+      setTaskError(error.response?.data?.message || 'Could not update task.')
+    }
+  }
+
+  async function handleToggleTodo(id) {
+    setTaskError('')
+
+    try {
+      const updatedTodo = await toggleTodoDone(id)
+      setTodos((current) => current.map((todo) => (todo._id === id ? updatedTodo : todo)))
+    } catch (error) {
+      setTaskError(error.response?.data?.message || 'Could not update task status.')
+    }
+  }
+
+  async function handleDeleteTodo(id) {
+    setTaskError('')
+
+    try {
+      await deleteTodo(id)
+      setTodos((current) => current.filter((todo) => todo._id !== id))
+    } catch (error) {
+      setTaskError(error.response?.data?.message || 'Could not delete task.')
+    }
+  }
+
+  if (!token && activeView === 'signup') {
+    return (
+      <SignupPage
+        error={authError}
+        loading={loading}
+        onNavigate={setActiveView}
+        onSignup={handleSignup}
+      />
+    )
+  }
+
+  if (!token) {
+    return (
+      <LoginPage
+        error={authError}
+        loading={loading}
+        onLogin={handleLogin}
+        onNavigate={setActiveView}
+      />
+    )
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <AppShell
+      activeView={activeView}
+      currentUser={currentUser}
+      onLogout={handleLogout}
+      onNavigate={setActiveView}
+    >
+      {activeView === 'admin' ? (
+        <AdminPage currentUser={currentUser} todos={todos} />
+      ) : (
+        <TasksPage
+          error={taskError}
+          loading={loading}
+          onCreateTodo={handleCreateTodo}
+          onDeleteTodo={handleDeleteTodo}
+          onToggleTodo={handleToggleTodo}
+          onUpdateTodo={handleUpdateTodo}
+          todos={todos}
+        />
+      )}
+    </AppShell>
   )
 }
 

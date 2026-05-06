@@ -2,5 +2,6 @@ node_modules/
 .env
 *.log
 .vite/
+.tmp_stitch_ui/
 dist/
 build/
