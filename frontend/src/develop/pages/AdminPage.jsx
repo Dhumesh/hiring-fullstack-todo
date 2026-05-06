@@ -162,21 +162,21 @@ function AdminPage({ currentUser }) {
 
         {adminSection === 'dashboard' && (
           <section className="metrics-grid">
-            <article className="metric-card wide">
+            <article className="metric-card wide" style={{ '--item-index': 0 }}>
               <span>Total Users</span>
               <strong>{stats.users}</strong>
               <p>{stats.completionRate}% task completion rate</p>
               <div className="bar-row" aria-hidden="true">
-                {[35, 52, 46, 78, 64, 95].map((height) => (
-                  <i key={height} style={{ height: `${height}%` }} />
+                {[35, 52, 46, 78, 64, 95].map((height, index) => (
+                  <i key={height} style={{ '--item-index': index, height: `${height}%` }} />
                 ))}
               </div>
             </article>
-            <article className="metric-card">
+            <article className="metric-card" style={{ '--item-index': 1 }}>
               <span>Active Tasks</span>
               <strong>{stats.pending}</strong>
             </article>
-            <article className="metric-card">
+            <article className="metric-card" style={{ '--item-index': 2 }}>
               <span>Completed</span>
               <strong>{stats.completed}</strong>
             </article>
@@ -200,12 +200,12 @@ function AdminPage({ currentUser }) {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => {
+                {users.map((user, index) => {
                   const isEditing = editingUserId === user._id
                   const isCurrentUser = currentUser?.id === user._id
 
                   return (
-                    <tr key={user._id}>
+                    <tr key={user._id} style={{ '--item-index': index }}>
                       <td>
                         {isEditing ? (
                           <input name="name" onChange={updateUserForm} value={userForm.name} />
@@ -285,8 +285,8 @@ function AdminPage({ currentUser }) {
                     <td colSpan="4">No task activity yet.</td>
                   </tr>
                 )}
-                {adminTodos.map((todo) => (
-                  <tr key={todo._id}>
+                {adminTodos.map((todo, index) => (
+                  <tr key={todo._id} style={{ '--item-index': index }}>
                     <td>
                       <strong>{todo.title}</strong>
                       <span>{todo.description || 'No description'}</span>

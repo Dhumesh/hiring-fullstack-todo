@@ -53,6 +53,91 @@
   }
 }
 
+@keyframes page-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes card-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+
+  70% {
+    transform: translateY(-2px) scale(1.01);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes brand-glow {
+  0%,
+  100% {
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.22);
+    transform: rotate(0deg) scale(1);
+  }
+
+  50% {
+    box-shadow: 0 12px 26px rgba(79, 70, 229, 0.34);
+    transform: rotate(-3deg) scale(1.04);
+  }
+}
+
+@keyframes soft-shimmer {
+  from {
+    transform: translateX(-120%);
+  }
+
+  to {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes check-pop {
+  0% {
+    transform: scale(0.45) rotate(-30deg);
+  }
+
+  75% {
+    transform: scale(1.18) rotate(6deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes loading-sheen {
+  0% {
+    background-position: 180% 0;
+  }
+
+  100% {
+    background-position: -180% 0;
+  }
+}
+
 .auth-page {
   align-items: center;
   background: var(--background);
@@ -71,6 +156,7 @@
 }
 
 .auth-card {
+  animation: card-pop 0.58s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   background: var(--surface);
   border: 1px solid var(--outline);
   border-radius: var(--radius);
@@ -132,6 +218,7 @@
 
 .brand-icon {
   align-items: center;
+  animation: brand-glow 6s ease-in-out infinite;
   background: var(--primary-container);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -142,6 +229,15 @@
   height: 48px;
   place-items: center;
   width: 48px;
+}
+
+.brand-icon span {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.brand:hover .brand-icon span {
+  transform: scale(1.12) rotate(-8deg);
 }
 
 .brand-compact .brand-icon {
@@ -185,7 +281,8 @@
   padding: 14px 16px;
   transition:
     border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
   width: 100%;
 }
 
@@ -197,6 +294,7 @@
 .admin-header input:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+  transform: translateY(-1px);
 }
 
 .check-row {
@@ -222,14 +320,31 @@
   font-weight: 700;
   gap: 8px;
   justify-content: center;
+  overflow: hidden;
   padding: 14px 18px;
+  position: relative;
   transition:
+    box-shadow 0.2s ease,
     opacity 0.2s ease,
     transform 0.2s ease;
 }
 
+.primary-button::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  content: '';
+  inset: 0;
+  position: absolute;
+  transform: translateX(-120%);
+}
+
 .primary-button:hover {
+  box-shadow: 0 10px 22px rgba(79, 70, 229, 0.22);
   opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.primary-button:hover::after {
+  animation: soft-shimmer 0.8s ease;
 }
 
 .primary-button:active {
@@ -258,6 +373,7 @@
 }
 
 .alert {
+  animation: page-rise 0.32s ease both;
   background: var(--danger-soft);
   border: 1px solid rgba(186, 26, 26, 0.18);
   border-radius: 8px;
@@ -267,6 +383,7 @@
 }
 
 .auth-visual {
+  animation: page-rise 0.72s 0.08s ease both;
   align-items: flex-end;
   align-self: center;
   background:
@@ -325,7 +442,10 @@
 }
 
 .app-shell {
-  background: #f9fafb;
+  background:
+    radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(255, 219, 204, 0.38), transparent 34%),
+    #f9fafb;
   min-height: 100vh;
 }
 
@@ -387,7 +507,15 @@
   font-weight: 800;
   height: 36px;
   place-items: center;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
   width: 36px;
+}
+
+.user-menu:hover .avatar {
+  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.16);
+  transform: translateY(-1px) scale(1.04);
 }
 
 .user-copy {
@@ -414,7 +542,17 @@
   display: inline-flex;
   height: 36px;
   justify-content: center;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
   width: 36px;
+}
+
+.icon-button:hover {
+  background: var(--primary-soft);
+  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.12);
+  transform: translateY(-1px) rotate(-3deg);
 }
 
 .logout-icon {
@@ -434,12 +572,14 @@
 }
 
 .workspace-page {
+  animation: page-rise 0.5s ease both;
   margin: 0 auto;
   max-width: 760px;
   padding: 40px 20px 72px;
 }
 
 .hero-copy {
+  animation: page-rise 0.55s 0.04s ease both;
   margin-bottom: 32px;
   text-align: center;
 }
@@ -456,6 +596,7 @@
 }
 
 .task-form-card {
+  animation: card-pop 0.5s 0.1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   margin-bottom: 32px;
   padding: 24px;
 }
@@ -472,6 +613,7 @@
 }
 
 .section-heading {
+  animation: page-rise 0.45s 0.16s ease both;
   align-items: center;
   display: flex;
   justify-content: space-between;
@@ -491,6 +633,14 @@
   font-size: 12px;
   font-weight: 700;
   padding: 6px 10px;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.section-heading:hover span {
+  background: var(--primary-soft);
+  transform: translateY(-1px);
 }
 
 .task-list {
@@ -500,23 +650,42 @@
 }
 
 .task-card {
+  animation: card-pop 0.46s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(0.05s + (var(--item-index, 0) * 0.045s));
   align-items: center;
   display: flex;
   gap: 16px;
   padding: 16px;
+  position: relative;
   transition:
     opacity 0.2s ease,
     transform 0.2s ease,
     box-shadow 0.2s ease;
 }
 
+.task-card::before {
+  background: linear-gradient(180deg, var(--primary-container), var(--tertiary-soft));
+  border-radius: 999px;
+  content: '';
+  inset: 14px auto 14px 0;
+  opacity: 0;
+  position: absolute;
+  transition: opacity 0.2s ease;
+  width: 3px;
+}
+
 .task-card:hover {
   box-shadow: 0 10px 22px rgba(28, 24, 42, 0.1);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+}
+
+.task-card:hover::before {
+  opacity: 1;
 }
 
 .task-card.done {
   opacity: 0.62;
+  transform: scale(0.99);
 }
 
 .done-toggle {
@@ -530,12 +699,23 @@
   font-weight: 800;
   height: 26px;
   place-items: center;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
   width: 26px;
 }
 
 .done-toggle.active {
   background: var(--primary-container);
   border-color: var(--primary-container);
+  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.24);
+  animation: check-pop 0.34s ease both;
+}
+
+.done-toggle:hover {
+  transform: scale(1.08);
 }
 
 .task-body,
@@ -579,6 +759,18 @@
   color: var(--primary);
   font-weight: 700;
   padding: 8px 10px;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.task-actions button:hover,
+.admin-actions button:hover,
+.table-heading button:hover {
+  background: var(--primary-soft);
+  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.1);
+  transform: translateY(-1px);
 }
 
 .task-actions .danger {
@@ -586,6 +778,7 @@
 }
 
 .empty-state {
+  animation: page-rise 0.4s ease both;
   background: var(--surface-low);
   border: 1px dashed var(--outline);
   border-radius: var(--radius);
@@ -662,11 +855,13 @@
 }
 
 .admin-canvas {
+  animation: page-rise 0.46s ease both;
   flex: 1;
   padding: 32px;
 }
 
 .admin-header {
+  animation: page-rise 0.5s ease both;
   align-items: center;
   display: flex;
   gap: 20px;
@@ -693,9 +888,22 @@
 }
 
 .metric-card {
-  animation: quiet-pulse 7s ease-in-out infinite;
+  animation:
+    card-pop 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both,
+    quiet-pulse 7s ease-in-out infinite;
+  animation-delay:
+    calc(0.06s + (var(--item-index, 0) * 0.06s)),
+    calc(0.7s + (var(--item-index, 0) * 0.2s));
   min-height: 160px;
   padding: 24px;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.metric-card:hover {
+  box-shadow: 0 16px 32px rgba(28, 24, 42, 0.12);
+  transform: translateY(-3px);
 }
 
 .metric-card.wide {
@@ -726,6 +934,9 @@
   background: rgba(79, 70, 229, 0.22);
   border-radius: 4px 4px 0 0;
   flex: 1;
+  transform-origin: bottom;
+  animation: bar-grow 0.62s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(0.18s + (var(--item-index, 0) * 0.04s));
   transition:
     height 0.3s ease,
     transform 0.2s ease;
@@ -741,6 +952,7 @@
 }
 
 .activity-table {
+  animation: card-pop 0.46s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   margin: 0 auto 24px;
   max-width: 1120px;
   overflow: hidden;
@@ -775,6 +987,15 @@ td {
   padding: 14px 24px;
   text-align: left;
   vertical-align: top;
+}
+
+tbody tr {
+  animation: page-rise 0.38s ease both;
+  animation-delay: calc(0.04s + (var(--item-index, 0) * 0.035s));
+}
+
+tbody tr:hover td {
+  background: rgba(79, 70, 229, 0.035);
 }
 
 th {
@@ -814,6 +1035,13 @@ td select {
   font-style: normal;
   font-weight: 700;
   padding: 6px 10px;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+tr:hover .status {
+  transform: translateY(-1px);
 }
 
 .done-status {
@@ -833,6 +1061,10 @@ td select {
   color: var(--primary);
   font-weight: 700;
   padding: 8px 10px;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .admin-actions .danger {
@@ -845,6 +1077,7 @@ td select {
 }
 
 .report-panel {
+  animation: card-pop 0.46s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   align-items: flex-start;
   background: var(--surface);
   border: 1px solid var(--outline);
@@ -886,9 +1119,20 @@ td select {
   font-weight: 800;
   padding: 16px;
   text-align: center;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.report-summary span:hover {
+  background: var(--primary-soft);
+  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.1);
+  transform: translateY(-2px);
 }
 
 .system-strip {
+  animation: page-rise 0.5s ease both;
   align-items: center;
   background: rgba(79, 70, 229, 0.05);
   display: flex;
@@ -922,6 +1166,8 @@ td select {
   background: var(--primary-container);
   border-radius: 999px;
   height: 34px;
+  animation: bar-grow 0.5s ease both;
+  transform-origin: bottom;
   transition:
     opacity 0.2s ease,
     transform 0.2s ease;

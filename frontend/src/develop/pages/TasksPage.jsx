@@ -110,18 +110,22 @@ function TasksPage({
           <div className="empty-state">No tasks yet. Add your first task above.</div>
         )}
 
-        {todos.map((todo) => {
+        {todos.map((todo, index) => {
           const isEditing = editingId === todo._id
 
           return (
-            <article className={todo.done ? 'task-card done' : 'task-card'} key={todo._id}>
+            <article
+              className={todo.done ? 'task-card done' : 'task-card'}
+              key={todo._id}
+              style={{ '--item-index': index }}
+            >
               <button
                 className={todo.done ? 'done-toggle active' : 'done-toggle'}
                 onClick={() => onToggleTodo(todo._id)}
                 title={todo.done ? 'Mark as not done' : 'Mark as done'}
                 type="button"
               >
-                {todo.done ? '✓' : ''}
+                {todo.done ? '\u2713' : ''}
               </button>
 
               {isEditing ? (
