@@ -37,7 +37,7 @@ function App() {
     )
     setToken(data.token)
     setCurrentUser(data.user)
-    setActiveView('tasks')
+    setActiveView(data.user?.role === 'admin' ? 'admin' : 'tasks')
   }
 
   async function handleLogin(payload) {
@@ -176,15 +176,24 @@ function App() {
     )
   }
 
+  const safeActiveView = currentUser?.role === 'admin' ? activeView : 'tasks'
+
   return (
     <AppShell
-      activeView={activeView}
+      activeView={safeActiveView}
       currentUser={currentUser}
       onLogout={handleLogout}
-      onNavigate={setActiveView}
+      onNavigate={(view) => {
+        if (view === 'admin' && currentUser?.role !== 'admin') {
+          setActiveView('tasks')
+          return
+        }
+
+        setActiveView(view)
+      }}
     >
-      {activeView === 'admin' ? (
-        <AdminPage currentUser={currentUser} todos={todos} />
+      {safeActiveView === 'admin' ? (
+        <AdminPage currentUser={currentUser} />
       ) : (
         <TasksPage
           error={taskError}

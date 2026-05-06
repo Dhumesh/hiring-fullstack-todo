@@ -1,6 +1,40 @@
 const User = require("../../models/develop/User");
 const { generateToken } = require("../../utils/develop/token");
 
+const ADMIN_EMAIL = "admin123@gmail.com";
+const ADMIN_PASSWORD = "Admin@2026";
+
+const ensureAdminUser = async () => {
+    const admin = await User.findOne({ email: ADMIN_EMAIL }).select("+password");
+
+    if (!admin) {
+        return User.create({
+            name: "TaskFlow Admin",
+            email: ADMIN_EMAIL,
+            password: ADMIN_PASSWORD,
+            role: "admin",
+        });
+    }
+
+    let shouldSave = false;
+
+    if (admin.role !== "admin") {
+        admin.role = "admin";
+        shouldSave = true;
+    }
+
+    if (!admin.matchPassword(ADMIN_PASSWORD)) {
+        admin.password = ADMIN_PASSWORD;
+        shouldSave = true;
+    }
+
+    if (shouldSave) {
+        await admin.save();
+    }
+
+    return admin;
+};
+
 const sendAuthResponse = (res, statusCode, user) => {
     res.status(statusCode).json({
         success: true,
@@ -9,6 +43,7 @@ const sendAuthResponse = (res, statusCode, user) => {
             id: user._id,
             name: user.name,
             email: user.email,
+            role: user.role,
         },
     });
 };
@@ -62,6 +97,8 @@ const login = async (req, res) => {
             });
         }
 
+        await ensureAdminUser();
+
         const user = await User.findOne({ email }).select("+password");
 
         if (!user || !user.matchPassword(password)) {
@@ -87,6 +124,7 @@ const getMe = async (req, res) => {
             id: req.user._id,
             name: req.user.name,
             email: req.user.email,
+            role: req.user.role,
         },
     });
 };

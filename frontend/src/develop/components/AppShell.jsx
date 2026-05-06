@@ -2,16 +2,18 @@ import BrandMark from './BrandMark'
 
 const navItems = [
   { id: 'tasks', label: 'Tasks' },
-  { id: 'admin', label: 'Admin' },
+  { id: 'admin', label: 'Admin', adminOnly: true },
 ]
 
 function AppShell({ activeView, children, currentUser, onNavigate, onLogout }) {
+  const visibleNavItems = navItems.filter((item) => !item.adminOnly || currentUser?.role === 'admin')
+
   return (
     <div className="app-shell">
       <header className="topbar">
         <BrandMark compact />
         <nav className="topnav" aria-label="Main navigation">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <button
               className={activeView === item.id ? 'nav-link active' : 'nav-link'}
               key={item.id}

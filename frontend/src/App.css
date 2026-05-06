@@ -581,6 +581,10 @@
   max-width: 280px;
 }
 
+.admin-report-button {
+  flex: 0 0 auto;
+}
+
 .metrics-grid {
   display: grid;
   gap: 18px;
@@ -683,6 +687,17 @@ td span {
   margin-top: 3px;
 }
 
+td input,
+td select {
+  background: var(--surface);
+  border: 1px solid var(--outline);
+  border-radius: 8px;
+  color: var(--text);
+  outline: none;
+  padding: 10px 12px;
+  width: 100%;
+}
+
 .status {
   background: var(--surface-high);
   border-radius: 999px;
@@ -696,6 +711,29 @@ td span {
 .done-status {
   background: rgba(79, 70, 229, 0.1);
   color: var(--primary);
+}
+
+.admin-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-actions button {
+  background: var(--surface-low);
+  border: 1px solid var(--outline);
+  border-radius: 8px;
+  color: var(--primary);
+  font-weight: 700;
+  padding: 8px 10px;
+}
+
+.admin-actions .danger {
+  color: var(--danger);
+}
+
+.admin-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .system-strip {

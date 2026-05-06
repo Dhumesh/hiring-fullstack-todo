@@ -3,7 +3,8 @@ const Todo = require("../../models/develop/Todo");
 // GET all todos
 exports.getTodos = async (req, res) => {
     try {
-        const todos = await Todo.find().sort({ createdAt: -1 });
+        const filter = req.user.role === "admin" ? {} : { owner: req.user._id };
+        const todos = await Todo.find(filter).populate("owner", "name email role").sort({ createdAt: -1 });
         res.json(todos);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -18,6 +19,7 @@ exports.createTodo = async (req, res) => {
         const todo = new Todo({
             title,
             description,
+            owner: req.user._id,
         });
 
         const savedTodo = await todo.save();
@@ -32,11 +34,12 @@ exports.updateTodo = async (req, res) => {
     try {
         const { title, description } = req.body;
 
-        const updated = await Todo.findByIdAndUpdate(
-            req.params.id,
-            { title, description },
-            { new: true }
-        );
+        const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, owner: req.user._id };
+        const updated = await Todo.findOneAndUpdate(filter, { title, description }, { new: true });
+
+        if (!updated) {
+            return res.status(404).json({ message: "Todo not found" });
+        }
 
         res.json(updated);
     } catch (error) {
@@ -47,7 +50,12 @@ exports.updateTodo = async (req, res) => {
 // TOGGLE done
 exports.toggleTodoDone = async (req, res) => {
     try {
-        const todo = await Todo.findById(req.params.id);
+        const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, owner: req.user._id };
+        const todo = await Todo.findOne(filter);
+
+        if (!todo) {
+            return res.status(404).json({ message: "Todo not found" });
+        }
 
         todo.done = !todo.done;
         const updated = await todo.save();
@@ -61,7 +69,13 @@ exports.toggleTodoDone = async (req, res) => {
 // DELETE todo
 exports.deleteTodo = async (req, res) => {
     try {
-        await Todo.findByIdAndDelete(req.params.id);
+        const filter = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, owner: req.user._id };
+        const deleted = await Todo.findOneAndDelete(filter);
+
+        if (!deleted) {
+            return res.status(404).json({ message: "Todo not found" });
+        }
+
         res.json({ message: "Todo deleted" });
     } catch (error) {
         res.status(400).json({ message: error.message });

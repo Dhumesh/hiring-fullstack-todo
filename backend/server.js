@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const connectDB = require("./config/develop/db");
 const { swaggerDocument, swaggerHtml } = require("./docs/develop/swagger");
+const adminRoutes = require("./routes/develop/adminRoutes");
 const authRoutes = require("./routes/develop/authRoutes");
 const todoRoutes = require("./routes/develop/todoRoute");
 
@@ -27,6 +28,7 @@ app.get("/api-docs", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/todos", todoRoutes);
 
 app.listen(5000, () => {

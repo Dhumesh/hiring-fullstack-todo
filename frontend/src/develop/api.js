@@ -49,3 +49,30 @@ export async function deleteTodo(id) {
   const response = await api.delete(`/api/todos/${id}`)
   return response.data
 }
+
+export async function getAdminUsers() {
+  const response = await api.get('/api/admin/users')
+  return response.data
+}
+
+export async function updateAdminUser(id, payload) {
+  const response = await api.put(`/api/admin/users/${id}`, payload)
+  return response.data
+}
+
+export async function deleteAdminUser(id) {
+  const response = await api.delete(`/api/admin/users/${id}`)
+  return response.data
+}
+
+export async function getAdminTodos() {
+  const response = await api.get('/api/admin/todos')
+  return response.data
+}
+
+export async function downloadAdminReport() {
+  const response = await api.get('/api/admin/reports/download', {
+    responseType: 'blob',
+  })
+  return response.data
+}

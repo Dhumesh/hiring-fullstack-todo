@@ -1,15 +1,102 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  deleteAdminUser,
+  downloadAdminReport,
+  getAdminTodos,
+  getAdminUsers,
+  updateAdminUser,
+} from '../api'
 
-function AdminPage({ currentUser, todos }) {
+function AdminPage({ currentUser }) {
+  const [adminError, setAdminError] = useState('')
+  const [adminTodos, setAdminTodos] = useState([])
+  const [editingUserId, setEditingUserId] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [userForm, setUserForm] = useState({ name: '', email: '', role: 'user' })
+  const [users, setUsers] = useState([])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      loadAdminData()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
+  }, [])
+
   const stats = useMemo(() => {
-    const completed = todos.filter((todo) => todo.done).length
-    const pending = todos.length - completed
-    const completionRate = todos.length ? Math.round((completed / todos.length) * 100) : 0
+    const completed = adminTodos.filter((todo) => todo.done).length
+    const pending = adminTodos.length - completed
+    const completionRate = adminTodos.length ? Math.round((completed / adminTodos.length) * 100) : 0
 
-    return { completed, completionRate, pending, total: todos.length }
-  }, [todos])
+    return { completed, completionRate, pending, total: adminTodos.length, users: users.length }
+  }, [adminTodos, users])
 
-  const recentItems = todos.slice(0, 5)
+  async function loadAdminData() {
+    setLoading(true)
+    setAdminError('')
+
+    try {
+      const [userData, todoData] = await Promise.all([getAdminUsers(), getAdminTodos()])
+      setUsers(userData)
+      setAdminTodos(todoData)
+    } catch (error) {
+      setAdminError(error.response?.data?.message || 'Could not load admin data.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function startEditingUser(user) {
+    setEditingUserId(user._id)
+    setUserForm({
+      name: user.name,
+      email: user.email,
+      role: user.role || 'user',
+    })
+  }
+
+  function updateUserForm(event) {
+    setUserForm((current) => ({
+      ...current,
+      [event.target.name]: event.target.value,
+    }))
+  }
+
+  async function saveUser(userId) {
+    try {
+      const updatedUser = await updateAdminUser(userId, userForm)
+      setUsers((current) => current.map((user) => (user._id === userId ? updatedUser : user)))
+      setEditingUserId('')
+    } catch (error) {
+      setAdminError(error.response?.data?.message || 'Could not update user.')
+    }
+  }
+
+  async function removeUser(userId) {
+    try {
+      await deleteAdminUser(userId)
+      setUsers((current) => current.filter((user) => user._id !== userId))
+      setAdminTodos((current) => current.filter((todo) => todo.owner?._id !== userId))
+    } catch (error) {
+      setAdminError(error.response?.data?.message || 'Could not delete user.')
+    }
+  }
+
+  async function downloadReport() {
+    try {
+      const blob = await downloadAdminReport()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'taskflow-report.csv'
+      link.click()
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      setAdminError(error.response?.data?.message || 'Could not download report.')
+    }
+  }
+
+  const recentItems = adminTodos.slice(0, 5)
 
   return (
     <main className="admin-layout">
@@ -21,11 +108,10 @@ function AdminPage({ currentUser, todos }) {
         <nav>
           <a className="active" href="#dashboard">Dashboard</a>
           <a href="#users">Users</a>
-          <a href="#stats">System Stats</a>
           <a href="#tasks">Tasks</a>
-          <a href="#settings">Settings</a>
+          <a href="#reports">Reports</a>
         </nav>
-        <button type="button">New Report</button>
+        <button onClick={downloadReport} type="button">Download Report</button>
       </aside>
 
       <section className="admin-canvas">
@@ -34,14 +120,19 @@ function AdminPage({ currentUser, todos }) {
             <h1>Dashboard Overview</h1>
             <p>Signed in as {currentUser?.email || 'admin user'}</p>
           </div>
-          <input aria-label="Search system" placeholder="Search system..." />
+          <button className="primary-button admin-report-button" onClick={downloadReport} type="button">
+            Download CSV Report
+          </button>
         </div>
+
+        {adminError && <div className="alert">{adminError}</div>}
+        {loading && <div className="empty-state">Loading admin dashboard...</div>}
 
         <section className="metrics-grid">
           <article className="metric-card wide">
-            <span>Total Tasks</span>
-            <strong>{stats.total}</strong>
-            <p>{stats.completionRate}% completion rate</p>
+            <span>Total Users</span>
+            <strong>{stats.users}</strong>
+            <p>{stats.completionRate}% task completion rate</p>
             <div className="bar-row" aria-hidden="true">
               {[35, 52, 46, 78, 64, 95].map((height) => (
                 <i key={height} style={{ height: `${height}%` }} />
@@ -58,10 +149,88 @@ function AdminPage({ currentUser, todos }) {
           </article>
         </section>
 
-        <section className="activity-table">
+        <section className="activity-table" id="users">
           <div className="table-heading">
-            <h2>Recent Task Activity</h2>
-            <button type="button">View All Activity →</button>
+            <h2>Users</h2>
+            <button onClick={loadAdminData} type="button">Refresh</button>
+          </div>
+          <div className="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user) => {
+                  const isEditing = editingUserId === user._id
+                  const isCurrentUser = currentUser?.id === user._id
+
+                  return (
+                    <tr key={user._id}>
+                      <td>
+                        {isEditing ? (
+                          <input name="name" onChange={updateUserForm} value={userForm.name} />
+                        ) : (
+                          <strong>{user.name}</strong>
+                        )}
+                      </td>
+                      <td>
+                        {isEditing ? (
+                          <input name="email" onChange={updateUserForm} value={userForm.email} />
+                        ) : (
+                          <span>{user.email}</span>
+                        )}
+                      </td>
+                      <td>
+                        {isEditing ? (
+                          <select name="role" onChange={updateUserForm} value={userForm.role}>
+                            <option value="user">user</option>
+                            <option value="admin">admin</option>
+                          </select>
+                        ) : (
+                          <em className={user.role === 'admin' ? 'status done-status' : 'status'}>
+                            {user.role || 'user'}
+                          </em>
+                        )}
+                      </td>
+                      <td>
+                        <div className="admin-actions">
+                          {isEditing ? (
+                            <>
+                              <button onClick={() => saveUser(user._id)} type="button">Save</button>
+                              <button onClick={() => setEditingUserId('')} type="button">Cancel</button>
+                            </>
+                          ) : (
+                            <>
+                              <button onClick={() => startEditingUser(user)} type="button">Edit</button>
+                              <button
+                                className="danger"
+                                disabled={isCurrentUser}
+                                onClick={() => removeUser(user._id)}
+                                type="button"
+                              >
+                                Remove
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className="activity-table" id="tasks">
+          <div className="table-heading">
+            <h2>All Tasks</h2>
+            <button onClick={downloadReport} type="button">Download Report</button>
           </div>
           <div className="table-scroll">
             <table>
@@ -69,8 +238,8 @@ function AdminPage({ currentUser, todos }) {
                 <tr>
                   <th>Task</th>
                   <th>Status</th>
-                  <th>Updated</th>
                   <th>Owner</th>
+                  <th>Updated</th>
                 </tr>
               </thead>
               <tbody>
@@ -90,24 +259,12 @@ function AdminPage({ currentUser, todos }) {
                         {todo.done ? 'Completed' : 'Pending'}
                       </em>
                     </td>
+                    <td>{todo.owner?.email || 'Unassigned'}</td>
                     <td>{todo.updatedAt ? new Date(todo.updatedAt).toLocaleDateString() : 'Today'}</td>
-                    <td>{currentUser?.name || 'Current User'}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-        </section>
-
-        <section className="system-strip">
-          <div>
-            <h2>System Optimization Active</h2>
-            <p>TaskFlow is ready for the next UI pass: frontend polish, README, and demo flow.</p>
-          </div>
-          <div className="uptime-bars" aria-hidden="true">
-            {Array.from({ length: 20 }, (_, index) => (
-              <i className={index === 7 ? 'warning' : ''} key={index} />
-            ))}
           </div>
         </section>
       </section>
