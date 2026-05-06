@@ -393,12 +393,31 @@
 }
 
 .icon-button {
+  align-items: center;
   background: var(--surface-low);
   border: 1px solid var(--outline);
   border-radius: 8px;
   color: var(--muted);
+  display: inline-flex;
   height: 36px;
+  justify-content: center;
   width: 36px;
+}
+
+.logout-icon {
+  color: var(--primary);
+  font-size: 20px;
+  line-height: 1;
+  transform: rotate(180deg);
+}
+
+.sr-only {
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .workspace-page {

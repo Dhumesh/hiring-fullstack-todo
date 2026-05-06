@@ -39,7 +39,8 @@ function AppShell({ activeView, children, currentUser, onNavigate, onLogout }) {
             <span>{currentUser?.email || 'Signed in'}</span>
           </div>
           <button className="icon-button" onClick={onLogout} title="Log out" type="button">
-            ⎋
+            <span aria-hidden="true" className="logout-icon">↪</span>
+            <span className="sr-only">Log out</span>
           </button>
         </div>
       </header>
