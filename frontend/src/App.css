@@ -19,6 +19,40 @@
   --radius: 12px;
 }
 
+@keyframes side-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes ambient-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(-10px, 8px, 0) scale(1.03);
+  }
+}
+
+@keyframes quiet-pulse {
+  0%,
+  100% {
+    box-shadow: var(--shadow);
+  }
+
+  50% {
+    box-shadow: 0 12px 30px rgba(79, 70, 229, 0.14);
+  }
+}
+
 .auth-page {
   align-items: center;
   background: var(--background);
@@ -237,11 +271,25 @@
   max-width: 640px;
   min-height: calc(100vh - 48px);
   padding: 40px;
+  position: relative;
   width: 48vw;
+}
+
+.auth-visual::before {
+  animation: ambient-drift 9s ease-in-out infinite;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(79, 70, 229, 0.16), transparent 34%),
+    radial-gradient(circle at 70% 60%, rgba(255, 182, 149, 0.18), transparent 30%);
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
 }
 
 .auth-visual div {
   max-width: 440px;
+  position: relative;
+  z-index: 1;
 }
 
 .auth-visual h2 {
@@ -269,6 +317,7 @@
 }
 
 .topbar {
+  animation: side-panel-enter 0.45s ease both;
   align-items: center;
   background: var(--surface);
   border-bottom: 1px solid var(--outline);
@@ -294,11 +343,20 @@
   color: var(--muted);
   font-weight: 700;
   padding: 8px 10px;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .nav-link.active {
   border-color: var(--primary);
   color: var(--primary);
+}
+
+.nav-link:hover {
+  transform: translateY(-1px);
 }
 
 .user-menu {
@@ -510,6 +568,7 @@
 }
 
 .admin-sidebar {
+  animation: side-panel-enter 0.55s ease both;
   background: var(--surface-low);
   border-right: 1px solid var(--outline);
   display: flex;
@@ -544,12 +603,17 @@
   font-weight: 700;
   padding: 12px;
   text-decoration: none;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .admin-sidebar a.active,
 .admin-sidebar a:hover {
   background: rgba(79, 70, 229, 0.1);
   color: var(--primary);
+  transform: translateX(4px);
 }
 
 .admin-sidebar button {
@@ -594,6 +658,7 @@
 }
 
 .metric-card {
+  animation: quiet-pulse 7s ease-in-out infinite;
   min-height: 160px;
   padding: 24px;
 }
@@ -626,10 +691,18 @@
   background: rgba(79, 70, 229, 0.22);
   border-radius: 4px 4px 0 0;
   flex: 1;
+  transition:
+    height 0.3s ease,
+    transform 0.2s ease;
 }
 
 .bar-row i:last-child {
   background: var(--primary-container);
+}
+
+.bar-row:hover i {
+  transform: scaleY(1.06);
+  transform-origin: bottom;
 }
 
 .activity-table {
@@ -770,7 +843,14 @@ td select {
   background: var(--primary-container);
   border-radius: 999px;
   height: 34px;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
   width: 10px;
+}
+
+.uptime-bars:hover i {
+  transform: translateY(-2px);
 }
 
 .uptime-bars .warning {
@@ -838,5 +918,16 @@ td select {
   .task-actions {
     justify-content: flex-end;
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }
