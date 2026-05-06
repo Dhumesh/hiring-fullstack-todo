@@ -6,7 +6,13 @@ const navItems = [
 ]
 
 function AppShell({ activeView, children, currentUser, onNavigate, onLogout }) {
-  const visibleNavItems = navItems.filter((item) => !item.adminOnly || currentUser?.role === 'admin')
+  const visibleNavItems = navItems.filter((item) => {
+    if (currentUser?.role === 'admin') {
+      return item.id === 'admin'
+    }
+
+    return !item.adminOnly
+  })
 
   return (
     <div className="app-shell">
