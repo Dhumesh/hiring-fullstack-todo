@@ -597,11 +597,14 @@
   gap: 8px;
 }
 
-.admin-sidebar a {
+.admin-sidebar nav button {
+  background: transparent;
+  border: 0;
   border-radius: 8px;
   color: var(--muted);
   font-weight: 700;
   padding: 12px;
+  text-align: left;
   text-decoration: none;
   transition:
     background-color 0.2s ease,
@@ -609,8 +612,8 @@
     transform 0.2s ease;
 }
 
-.admin-sidebar a.active,
-.admin-sidebar a:hover {
+.admin-sidebar nav button.active,
+.admin-sidebar nav button:hover {
   background: rgba(79, 70, 229, 0.1);
   color: var(--primary);
   transform: translateX(4px);
@@ -809,6 +812,50 @@ td select {
   opacity: 0.45;
 }
 
+.report-panel {
+  align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin: 0 auto;
+  max-width: 1120px;
+  padding: 28px;
+}
+
+.report-panel h2 {
+  color: var(--text);
+  font-size: 24px;
+  margin: 8px 0;
+}
+
+.report-panel p {
+  color: var(--muted);
+  line-height: 24px;
+  margin: 0;
+  max-width: 620px;
+}
+
+.report-summary {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: 100%;
+}
+
+.report-summary span {
+  background: var(--surface-low);
+  border: 1px solid var(--outline);
+  border-radius: 10px;
+  color: var(--primary);
+  font-weight: 800;
+  padding: 16px;
+  text-align: center;
+}
+
 .system-strip {
   align-items: center;
   background: rgba(79, 70, 229, 0.05);
@@ -908,6 +955,10 @@ td select {
 
   .metrics-grid {
     grid-template-columns: 1fr;
+  }
+
+  .report-summary {
+    grid-template-columns: 1fr 1fr;
   }
 
   .task-card {

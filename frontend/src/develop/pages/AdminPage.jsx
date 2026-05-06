@@ -9,6 +9,7 @@ import {
 
 function AdminPage({ currentUser }) {
   const [adminError, setAdminError] = useState('')
+  const [adminSection, setAdminSection] = useState('dashboard')
   const [adminTodos, setAdminTodos] = useState([])
   const [editingUserId, setEditingUserId] = useState('')
   const [loading, setLoading] = useState(true)
@@ -96,7 +97,12 @@ function AdminPage({ currentUser }) {
     }
   }
 
-  const recentItems = adminTodos.slice(0, 5)
+  const sectionTitles = {
+    dashboard: 'Dashboard Overview',
+    users: 'Registered Users',
+    tasks: 'All User Tasks',
+    reports: 'Reports',
+  }
 
   return (
     <main className="admin-layout">
@@ -106,10 +112,34 @@ function AdminPage({ currentUser }) {
           <span>System Management</span>
         </div>
         <nav>
-          <a className="active" href="#dashboard">Dashboard</a>
-          <a href="#users">Users</a>
-          <a href="#tasks">Tasks</a>
-          <a href="#reports">Reports</a>
+          <button
+            className={adminSection === 'dashboard' ? 'active' : ''}
+            onClick={() => setAdminSection('dashboard')}
+            type="button"
+          >
+            Dashboard
+          </button>
+          <button
+            className={adminSection === 'users' ? 'active' : ''}
+            onClick={() => setAdminSection('users')}
+            type="button"
+          >
+            Users
+          </button>
+          <button
+            className={adminSection === 'tasks' ? 'active' : ''}
+            onClick={() => setAdminSection('tasks')}
+            type="button"
+          >
+            Tasks
+          </button>
+          <button
+            className={adminSection === 'reports' ? 'active' : ''}
+            onClick={() => setAdminSection('reports')}
+            type="button"
+          >
+            Reports
+          </button>
         </nav>
         <button onClick={downloadReport} type="button">Download Report</button>
       </aside>
@@ -117,39 +147,48 @@ function AdminPage({ currentUser }) {
       <section className="admin-canvas">
         <div className="admin-header">
           <div>
-            <h1>Dashboard Overview</h1>
+            <h1>{sectionTitles[adminSection]}</h1>
             <p>Signed in as {currentUser?.email || 'admin user'}</p>
           </div>
-          <button className="primary-button admin-report-button" onClick={downloadReport} type="button">
-            Download CSV Report
-          </button>
+          {adminSection === 'reports' ? (
+            <button className="primary-button admin-report-button" onClick={downloadReport} type="button">
+              Download CSV Report
+            </button>
+          ) : (
+            <button className="primary-button admin-report-button" onClick={loadAdminData} type="button">
+              Refresh
+            </button>
+          )}
         </div>
 
         {adminError && <div className="alert">{adminError}</div>}
         {loading && <div className="empty-state">Loading admin dashboard...</div>}
 
-        <section className="metrics-grid">
-          <article className="metric-card wide">
-            <span>Total Users</span>
-            <strong>{stats.users}</strong>
-            <p>{stats.completionRate}% task completion rate</p>
-            <div className="bar-row" aria-hidden="true">
-              {[35, 52, 46, 78, 64, 95].map((height) => (
-                <i key={height} style={{ height: `${height}%` }} />
-              ))}
-            </div>
-          </article>
-          <article className="metric-card">
-            <span>Active Tasks</span>
-            <strong>{stats.pending}</strong>
-          </article>
-          <article className="metric-card">
-            <span>Completed</span>
-            <strong>{stats.completed}</strong>
-          </article>
-        </section>
+        {adminSection === 'dashboard' && (
+          <section className="metrics-grid">
+            <article className="metric-card wide">
+              <span>Total Users</span>
+              <strong>{stats.users}</strong>
+              <p>{stats.completionRate}% task completion rate</p>
+              <div className="bar-row" aria-hidden="true">
+                {[35, 52, 46, 78, 64, 95].map((height) => (
+                  <i key={height} style={{ height: `${height}%` }} />
+                ))}
+              </div>
+            </article>
+            <article className="metric-card">
+              <span>Active Tasks</span>
+              <strong>{stats.pending}</strong>
+            </article>
+            <article className="metric-card">
+              <span>Completed</span>
+              <strong>{stats.completed}</strong>
+            </article>
+          </section>
+        )}
 
-        <section className="activity-table" id="users">
+        {adminSection === 'users' && (
+        <section className="activity-table">
           <div className="table-heading">
             <h2>Users</h2>
             <button onClick={loadAdminData} type="button">Refresh</button>
@@ -226,11 +265,13 @@ function AdminPage({ currentUser }) {
             </table>
           </div>
         </section>
+        )}
 
-        <section className="activity-table" id="tasks">
+        {adminSection === 'tasks' && (
+        <section className="activity-table">
           <div className="table-heading">
             <h2>All Tasks</h2>
-            <button onClick={downloadReport} type="button">Download Report</button>
+            <button onClick={loadAdminData} type="button">Refresh</button>
           </div>
           <div className="table-scroll">
             <table>
@@ -243,12 +284,12 @@ function AdminPage({ currentUser }) {
                 </tr>
               </thead>
               <tbody>
-                {recentItems.length === 0 && (
+                {adminTodos.length === 0 && (
                   <tr>
                     <td colSpan="4">No task activity yet.</td>
                   </tr>
                 )}
-                {recentItems.map((todo) => (
+                {adminTodos.map((todo) => (
                   <tr key={todo._id}>
                     <td>
                       <strong>{todo.title}</strong>
@@ -267,6 +308,28 @@ function AdminPage({ currentUser }) {
             </table>
           </div>
         </section>
+        )}
+
+        {adminSection === 'reports' && (
+          <section className="report-panel">
+            <div>
+              <span className="eyebrow">CSV Export</span>
+              <h2>Download TaskFlow report</h2>
+              <p>
+                Export registered users, task totals, task owners, and status data for your review.
+              </p>
+            </div>
+            <div className="report-summary">
+              <span>{stats.users} users</span>
+              <span>{stats.total} tasks</span>
+              <span>{stats.pending} pending</span>
+              <span>{stats.completed} completed</span>
+            </div>
+            <button className="primary-button" onClick={downloadReport} type="button">
+              Download CSV Report
+            </button>
+          </section>
+        )}
       </section>
     </main>
   )
