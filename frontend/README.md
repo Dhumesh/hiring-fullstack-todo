@@ -1,16 +1,44 @@
-# React + Vite
+# TaskFlow Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite frontend for the TaskFlow TODO app.
 
-Currently, two official plugins are available:
+## Setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```powershell
+npm install
+npm run dev
+```
 
-## React Compiler
+Open:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```txt
+http://localhost:5173
+```
 
-## Expanding the ESLint configuration
+## Screens
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Login
+- Signup
+- User task page
+- Admin dashboard
+- Admin users page
+- Admin tasks page
+- Admin report page
+
+## Behavior
+
+- Normal users only see the task page.
+- Admin users only see the admin area.
+- The UI calls the backend at `http://localhost:5000` by default.
+- To use a different backend URL, create a frontend `.env` file:
+
+```env
+VITE_API_URL=http://localhost:5000
+```
+
+## Checks
+
+```powershell
+npm run lint
+npm run build
+```
