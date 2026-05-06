@@ -150,11 +150,7 @@ function AdminPage({ currentUser }) {
             <h1>{sectionTitles[adminSection]}</h1>
             <p>Signed in as {currentUser?.email || 'admin user'}</p>
           </div>
-          {adminSection === 'reports' ? (
-            <button className="primary-button admin-report-button" onClick={downloadReport} type="button">
-              Download CSV Report
-            </button>
-          ) : (
+          {adminSection !== 'reports' && (
             <button className="primary-button admin-report-button" onClick={loadAdminData} type="button">
               Refresh
             </button>
